@@ -564,12 +564,12 @@ void fechaHora(){
 }
 
 void resetFlags(boolean Flag_Modo, boolean Flag_Alarma, boolean Estado_Valvulas){
-  if (Flag_Modo == true || Flag_Modo == false){
+  if (Flag_Modo != NULL){
     flagModo=Flag_Modo;
     flagModo2=Flag_Modo;
   }
  
-  if (Flag_Alarma == true || Flag_Alarma == false){
+  if (Flag_Alarma != NULL){
     flagAlarma=Flag_Alarma; 
     flagAlarma2=Flag_Alarma;
   }
