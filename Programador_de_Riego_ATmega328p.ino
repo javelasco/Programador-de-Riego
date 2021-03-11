@@ -205,7 +205,7 @@ void validarDiaAlarma(){
 void validarAlarmasRiego(){
 //################### VALIDAR ALARMA PARA RIEGO ###################  
   DateTime fechaNow = rtc.now(); 
-  if (fechaNow.hour()==hora_Inicio && fechaNow.minute()==minuto_Inicio){
+  if (fechaNow.hour()==hora_Inicio && fechaNow.minute()==minuto_Inicio && !flagAlarma){
     validarDiaAlarma();
     if (((diaSemanaAlarma[0] && dias_Riego[0])==HIGH || (diaSemanaAlarma[1] && dias_Riego[1])==HIGH || (diaSemanaAlarma[2] && dias_Riego[2])==HIGH ||
     (diaSemanaAlarma[3] && dias_Riego[3])==HIGH || (diaSemanaAlarma[4] && dias_Riego[4])==HIGH || (diaSemanaAlarma[5] && dias_Riego[5])==HIGH ||
@@ -216,7 +216,7 @@ void validarAlarmasRiego(){
     }
   }
 
-  if (fechaNow.hour()==hora_Inicio2 && fechaNow.minute()==minuto_Inicio2){
+  if (fechaNow.hour()==hora_Inicio2 && fechaNow.minute()==minuto_Inicio2 && !flagAlarma2){
     validarDiaAlarma();
     if (((diaSemanaAlarma[0] && dias_Riego2[0])==HIGH || (diaSemanaAlarma[1] && dias_Riego2[1])==HIGH || (diaSemanaAlarma[2] && dias_Riego2[2])==HIGH ||
     (diaSemanaAlarma[3] && dias_Riego2[3])==HIGH || (diaSemanaAlarma[4] && dias_Riego2[4])==HIGH || (diaSemanaAlarma[5] && dias_Riego2[5])==HIGH ||
@@ -227,18 +227,20 @@ void validarAlarmasRiego(){
     }
   }         
 
-  if (flagAlarma || flagAlarma2){
-    validarAlarmasRiego2(alarmaHoras, alarmaMinutos, flagAlarma, valvula_1);
-    validarAlarmasRiego2(alarmaHoras2, alarmaMinutos2, flagAlarma2, valvula_2);  
+  if (flagAlarma){
+    validarAlarmasRiego2(alarmaHoras, alarmaMinutos, &flagAlarma, valvula_1);
+  }
+  if(flagAlarma2){
+    validarAlarmasRiego2(alarmaHoras2, alarmaMinutos2, &flagAlarma2, valvula_2);  
   }
 }
 
-void validarAlarmasRiego2(byte Alarm_H, byte Alarm_M, boolean FlagAlarm, int Valvulas){
+void validarAlarmasRiego2(byte Alarm_H, byte Alarm_M, boolean *FlagAlarm, int Valvulas){
   DateTime fechaNow = rtc.now();
-  if (fechaNow.hour()==Alarm_H && fechaNow.minute()==Alarm_M && FlagAlarm){
+  if (fechaNow.hour()==Alarm_H && fechaNow.minute()==Alarm_M && *FlagAlarm){
       DateTime fechaNow = rtc.now(); 
       digitalWrite(Valvulas,HIGH);
-      FlagAlarm=false;
+      *FlagAlarm=false;
   }
 }
 
