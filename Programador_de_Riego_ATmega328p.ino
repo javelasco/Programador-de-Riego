@@ -445,13 +445,13 @@ void subDashboard(){
 
 void display_day(unsigned int x_pos, unsigned int y_pos){
   switch(diaSemana){
-    case 1: textSinClear(x_pos, y_pos, "  LUNES", 3, NULL); break;
-    case 2: textSinClear(x_pos, y_pos, "  MARTES", 3, NULL); break;
+    case 1: textSinClear(x_pos, y_pos, "  LUNES    ", 3, NULL); break;
+    case 2: textSinClear(x_pos, y_pos, "  MARTES   ", 3, NULL); break;
     case 3: textSinClear(x_pos, y_pos, "MIERCOLES", 3, NULL); break;
-    case 4: textSinClear(x_pos, y_pos, "  JUEVES", 3, NULL); break;
-    case 5: textSinClear(x_pos, y_pos, " VIERNES", 3, NULL); break;
-    case 6: textSinClear(x_pos, y_pos, "  SABADO", 3, NULL); break;
-    default: textSinClear(x_pos, y_pos, " DOMINGO", 3, NULL);
+    case 4: textSinClear(x_pos, y_pos, "  JUEVES   ", 3, NULL); break;
+    case 5: textSinClear(x_pos, y_pos, " VIERNES   ", 3, NULL); break;
+    case 6: textSinClear(x_pos, y_pos, "  SABADO   ", 3, NULL); break;
+    default: textSinClear(x_pos, y_pos, " DOMINGO  ", 3, NULL);
   }
 }
 
