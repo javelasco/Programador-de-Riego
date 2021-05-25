@@ -11,8 +11,7 @@ RTC_DS3231 rtc;                 // SDA a pin A4 y SCL a pin A5
 #include <FreeDefaultFonts.h>
 
 #define pulsador    10
-#define valvula_1    11
-#define valvula_2    13
+#define valvula_1    12
 
 #define BLACK   0x0000
 #define RED     0xF800
@@ -25,138 +24,103 @@ RTC_DS3231 rtc;                 // SDA a pin A4 y SCL a pin A5
 //#define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
 
 #define EEPROM_hora_Inicio  1
-#define EEPROM_hora_Inicio2  2
 
 #define EEPROM_minuto_Inicio  5
-#define EEPROM_minuto_Inicio2  6
 
 #define EEPROM_duracion_Horas  9
-#define EEPROM_duracion_Horas2  10
 
 #define EEPROM_duracion_Minutos  13
-#define EEPROM_duracion_Minutos2  14
 
 #define EEPROM_dias_Riego_0  17
-#define EEPROM_dias_Riego2_0  18
 
 #define EEPROM_dias_Riego_1  21
-#define EEPROM_dias_Riego2_1  22
 
 #define EEPROM_dias_Riego_2  25
-#define EEPROM_dias_Riego2_2  26
 
 #define EEPROM_dias_Riego_3  29
-#define EEPROM_dias_Riego2_3  30
 
 #define EEPROM_dias_Riego_4  33
-#define EEPROM_dias_Riego2_4  34
 
 #define EEPROM_dias_Riego_5  37
-#define EEPROM_dias_Riego2_5  38
 
 #define EEPROM_dias_Riego_6  41
-#define EEPROM_dias_Riego2_6  42
 
 #define EEPROM_marca_Dias_Riego_0  45
-#define EEPROM_marca_Dias_Riego2_0  46
 
 #define EEPROM_marca_Dias_Riego_1  49
-#define EEPROM_marca_Dias_Riego2_1  50
 
 #define EEPROM_marca_Dias_Riego_2  53
-#define EEPROM_marca_Dias_Riego2_2  54
 
 #define EEPROM_marca_Dias_Riego_3  57
-#define EEPROM_marca_Dias_Riego2_3  58
-#define EEPROM_marca_Dias_Riego3_3  59
-#define EEPROM_marca_Dias_Riego4_3  60
 
 #define EEPROM_marca_Dias_Riego_4  61
-#define EEPROM_marca_Dias_Riego2_4  62
 
 #define EEPROM_marca_Dias_Riego_5  65
-#define EEPROM_marca_Dias_Riego2_5  66
 
 #define EEPROM_marca_Dias_Riego_6  69
-#define EEPROM_marca_Dias_Riego2_6  70
 
 #define EEPROM_lunes  74
-#define EEPROM_lunes2  75
 
 #define EEPROM_martes  78
-#define EEPROM_martes2  79
 
 #define EEPROM_miercoles  82
-#define EEPROM_miercoles2  83
 
 #define EEPROM_jueves  86
-#define EEPROM_jueves2  87
 
 #define EEPROM_viernes  90
-#define EEPROM_viernes2  91
 
 #define EEPROM_sabado  94
-#define EEPROM_sabado2  95
 
 #define EEPROM_domingo  98
-#define EEPROM_domingo2  99
 
 #define EEPROM_flagModo1  102
-#define EEPROM_flagModo2  103
 
 #define EEPROM_sector1  106
-#define EEPROM_sector2  107
 
 #define EEPROM_sector_Marca1  110
-#define EEPROM_sector_Marca2  111
 
 unsigned int JoystickX, JoystickY;
 byte IDSubSetting=0, i=0;
 byte countJoystickV=1, countJoystickH=1;
 byte alarmaHoras=0, alarmaMinutos=0;
-byte alarmaHoras2=0, alarmaMinutos2=0;
 byte diaDelaSemana, diaSemanaRiego, contadorSector, flagConfigDate=0;
 int dia, mes, anio, hora, minuto;
 byte diaSemana, segundo=0;
 byte diaSemanaAlarma[] = {LOW,LOW,LOW,LOW,LOW,LOW,LOW};
-boolean flagDashboard=true, flagSettings=false, flagAlarma=false, flagAlarma2=false, JoystickSW, flagSubDashboard=false, flagSettings2=false;
+boolean flagDashboard=true, flagSettings=false, flagAlarma=false, JoystickSW, flagSubDashboard=false, flagSettings2=false;
 
 //Variables en EEPROM
-boolean flagModo=false, flagModo2=false;
+boolean flagModo=false; // Boolean que indica si el modo Automático está activo: True:Activo / False: Desactivado
 
 byte hora_Inicio=0, minuto_Inicio=0, duracion_Horas=0, duracion_Minutos=0;
-byte hora_Inicio2=0, minuto_Inicio2=0, duracion_Horas2=0, duracion_Minutos2=0;
 
 byte dias_Riego[] = {LOW,LOW,LOW,LOW,LOW,LOW,LOW};
-byte dias_Riego2[] = {LOW,LOW,LOW,LOW,LOW,LOW,LOW};
 
 byte sector[] = {LOW,LOW,LOW,LOW};
 char sector_Marca[] = {' ', ' ', ' ', ' '};
 
 //Variables usadas para el selector de días
 char marca_Dias_Riego[] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
-char marca_Dias_Riego2[] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
 
 //Variables usadas para mostrar en el Dashboard
 char dia_Semana[]={'_', '_', '_', '_', '_', '_', '_'};
-char dia_Semana2[]={'_', '_', '_', '_', '_', '_', '_'};
 
 void setup() {
   pinMode(pulsador, INPUT_PULLUP);
-  pinMode(valvula_1, OUTPUT); pinMode(valvula_2, OUTPUT);      
-  digitalWrite(valvula_1,HIGH); digitalWrite(valvula_2,HIGH);
+  pinMode(valvula_1, OUTPUT);     
+  digitalWrite(valvula_1,HIGH);
   
-  //Serial.begin(9600);      
+  Serial.begin(9600);      
 
 //Inicializar por primera vez la eeprom del ATmega328p
-  if (EEPROM.read(EEPROM_hora_Inicio) != 255 || EEPROM.read(EEPROM_lunes) != 255 || EEPROM.read(EEPROM_martes2) != 255)
+  if (EEPROM.read(EEPROM_hora_Inicio) != 255 || EEPROM.read(EEPROM_lunes) != 255)
     readEEPROM();
   else
     writeEEPROM();
 
   // Iniciar RTC
   if(!rtc.begin()){
-    //Serial.println("¡Modulo RTC no encontrado!");
+    Serial.println("¡Modulo RTC no encontrado!");
     for(;;); //bucle 
     }
 
@@ -190,7 +154,7 @@ void checkTiempoAlarma(byte *alarma_H, byte *alarma_M, byte *duracion_H, byte *d
 }    
 
 void validarDiaAlarma(){
-  DateTime fechaNow = rtc.now();   
+  DateTime fechaNow = rtc.now(); 
   switch (fechaNow.dayOfTheWeek()){
     case 1: diaSemanaAlarma[0]=HIGH; diaSemanaAlarma[1]=LOW; diaSemanaAlarma[2]=LOW; diaSemanaAlarma[3]=LOW; diaSemanaAlarma[4]=LOW; diaSemanaAlarma[5]=LOW; diaSemanaAlarma[6]=LOW; break;
     case 2: diaSemanaAlarma[0]=LOW; diaSemanaAlarma[1]=HIGH; diaSemanaAlarma[2]=LOW; diaSemanaAlarma[3]=LOW; diaSemanaAlarma[4]=LOW; diaSemanaAlarma[5]=LOW; diaSemanaAlarma[6]=LOW; break;
@@ -216,22 +180,8 @@ void validarAlarmasRiego(){
     }
   }
 
-  if (fechaNow.hour()==hora_Inicio2 && fechaNow.minute()==minuto_Inicio2 && !flagAlarma2){
-    validarDiaAlarma();
-    if (((diaSemanaAlarma[0] && dias_Riego2[0])==HIGH || (diaSemanaAlarma[1] && dias_Riego2[1])==HIGH || (diaSemanaAlarma[2] && dias_Riego2[2])==HIGH ||
-    (diaSemanaAlarma[3] && dias_Riego2[3])==HIGH || (diaSemanaAlarma[4] && dias_Riego2[4])==HIGH || (diaSemanaAlarma[5] && dias_Riego2[5])==HIGH ||
-    (diaSemanaAlarma[6] && dias_Riego2[6])==HIGH) && !flagAlarma2 && flagModo2 && (duracion_Horas2+duracion_Minutos2) != 0){
-        checkTiempoAlarma(&alarmaHoras2, &alarmaMinutos2, &duracion_Horas2, &duracion_Minutos2);
-        flagAlarma2=true;
-        digitalWrite(valvula_2,LOW);
-    }
-  }         
-
   if (flagAlarma){
     validarAlarmasRiego2(alarmaHoras, alarmaMinutos, &flagAlarma, valvula_1);
-  }
-  if(flagAlarma2){
-    validarAlarmasRiego2(alarmaHoras2, alarmaMinutos2, &flagAlarma2, valvula_2);  
   }
 }
 
@@ -244,7 +194,8 @@ void validarAlarmasRiego2(byte Alarm_H, byte Alarm_M, boolean *FlagAlarm, int Va
   }
 }
 
-void loop() {   
+void loop() {
+  //Serial.println("Empieza Programa");   
   while (flagDashboard){
   
     validarAlarmasRiego();
@@ -285,7 +236,7 @@ void loop() {
     JoystickY = analogRead(A7);
   
     //MOVIMIENTOS VERTICALES
-    if (JoystickY > 530 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO? 
+    if (JoystickY > 600 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO? 
       delay(200);
       if(countJoystickV >= 4) countJoystickV=0;
       countJoystickV++;
@@ -390,7 +341,7 @@ void dashboard(){
    printDigits(minuto);
    tft.print(':');      
    printDigits(fechaNow.second());  
-   if (digitalRead(valvula_1)==LOW || digitalRead(valvula_2)==LOW) {
+   if (digitalRead(valvula_1)==LOW) {
       tft.setTextColor(BLACK,WHITE); 
       textSinClear(180, 272, "REGANDO!", 3, NULL);
    }
@@ -437,9 +388,6 @@ void subDashboard(){
     flagSubDashboard=true;
     tft.fillRect(0,0,480,48,BLACK);
     subDashboard2(dia_Semana, 15, hora_Inicio, minuto_Inicio, duracion_Horas, duracion_Minutos, flagModo);  
-
-    tft.fillRect(0,49,480,48,RED);
-    subDashboard2(dia_Semana2, 65, hora_Inicio2, minuto_Inicio2, duracion_Horas2, duracion_Minutos2, flagModo2); 
   }
 }
 
@@ -568,16 +516,13 @@ void fechaHora(){
 void resetFlags(boolean Flag_Modo, boolean Flag_Alarma, boolean Estado_Valvulas){
   if (Flag_Modo != NULL){
     flagModo=Flag_Modo;
-    flagModo2=Flag_Modo;
   }
  
   if (Flag_Alarma != NULL){
     flagAlarma=Flag_Alarma; 
-    flagAlarma2=Flag_Alarma;
   }
   
   digitalWrite(valvula_1, Estado_Valvulas);
-  digitalWrite(valvula_2, Estado_Valvulas); 
 }
 
 byte edit(unsigned int x_pos, unsigned int y_pos, byte sizeText, int parametro, const GFXfont *f){
@@ -591,7 +536,7 @@ byte edit(unsigned int x_pos, unsigned int y_pos, byte sizeText, int parametro, 
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
 
-    if (JoystickY >530 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       switch(i){
         case 1: 
           if(parametro < 1) parametro = 31; 
@@ -712,7 +657,7 @@ void riegoManual(){
   while(!flagDashboard){
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >530 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >600 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 2) countJoystickV=0;
       countJoystickV++;
@@ -741,8 +686,7 @@ void riegoManual(){
         textSinClear(118, 128, "DESACTIVADO", 4, NULL); 
         delay(1500); 
         resetFlags(false, NULL, HIGH);  
-        flagModo=EEPROM.read(EEPROM_flagModo1);
-        flagModo2=EEPROM.read(EEPROM_flagModo2);                         
+        flagModo=EEPROM.read(EEPROM_flagModo1);                      
         flagDashboard=true; 
         flagSettings=false; 
       }
@@ -758,10 +702,10 @@ void selectorRiegoManual(){
 }
 
 void desactivar (){ 
-  digitalWrite(valvula_1, HIGH); digitalWrite(valvula_2, HIGH); 
+  digitalWrite(valvula_1, HIGH);
   flagDashboard=true;
   flagSettings=false;
-  flagAlarma=false; flagAlarma2=false;  
+  flagAlarma=false;
    
   countJoystickV=1;
   mostrarSectoresActivar();
@@ -772,18 +716,18 @@ void desactivar (){
      mostrarSectores();
      oscilarText();
      if (JoystickY >= 0 && JoystickY < 470) {         //¿SE MUEVE HACIA ARRIBA?
-       if(contadorSector < 1) contadorSector = 4;   
+       if(contadorSector < 1) contadorSector = 3;   
        tft.setTextColor(BLACK, WHITE); 
        mostrarSectores();
        contadorSector--;
-       if(contadorSector < 1) contadorSector = 3 ;
+       if(contadorSector < 1) contadorSector = 2 ;
        delay(200);   
      }
-     if (JoystickY >530 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
+     if (JoystickY >600 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
        tft.setTextColor(BLACK, WHITE); 
        mostrarSectores();
        contadorSector++;
-       if(contadorSector > 3) contadorSector = 1;
+       if(contadorSector > 2) contadorSector = 1;
        delay(200);      
      }
        tft.setTextColor(BLACK, WHITE); 
@@ -800,12 +744,6 @@ void desactivar (){
          sector[0]=!sector[0];
          EEPROM.write(EEPROM_sector1, sector[0]); 
          selectorSectores();    
-         break; 
-
-         case 2:
-         sector[1]=!sector[1];
-         EEPROM.write(EEPROM_sector2, sector[1]);
-         selectorSectores();
          break;             
 
          default:
@@ -842,31 +780,6 @@ void selectorSectores(){
       EEPROM.write(EEPROM_flagModo1, flagModo);            
       break;        
     }
-    
-    case 2:
-    if(sector[1]==HIGH) {
-      sector_Marca[1]='X';
-      EEPROM.write(EEPROM_sector_Marca2, sector_Marca[1]);
-      tft.setTextColor(BLACK, WHITE);
-      tft.setTextSize(2);
-      tft.setCursor(64, 120);
-      tft.print(sector_Marca[1]);
-      flagModo2=true;      
-      EEPROM.write(EEPROM_flagModo2, flagModo2);      
-      break;          
-    }
-    else {
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);     
-      tft.setCursor(64, 120);
-      tft.print(sector_Marca[1]);     
-      sector_Marca[1]=' ';
-      EEPROM.write(EEPROM_sector_Marca2, sector_Marca[1]);
-      tft.setTextColor(BLACK, WHITE);
-      flagModo2=false;      
-      EEPROM.write(EEPROM_flagModo2, flagModo2);         
-      break;                  
-    }
    
     default:
     delay(200);
@@ -882,9 +795,6 @@ void mostrarSectoresActivar(){
   textSinClear(45, 80, "(  ) SECTOR #1", 2, NULL); 
   tft.setCursor(64, 80);
   tft.print(sector_Marca[0]);
-  textSinClear(45, 120, "(  ) SECTOR #2", 2, NULL);
-  tft.setCursor(64, 120);
-  tft.print(sector_Marca[1]);       
 
   textSinClear(312, 272, "GUARDAR", 3, NULL);    
 }
@@ -892,7 +802,6 @@ void mostrarSectoresActivar(){
 void mostrarSectores(){
   switch(contadorSector){
   case 1: textSinClear(105, 80, "SECTOR #1", 2, NULL); break;
-  case 2: textSinClear(105, 120, "SECTOR #2", 2, NULL); break;
   default: textSinClear(312, 272, "GUARDAR", 3, NULL);              
   }
 }  
@@ -900,8 +809,7 @@ void mostrarSectores(){
 void selectorProgSecuencia(){
   switch(countJoystickV){
   case 1: limpiarSelector(); textSinClear(18, 80, ">", 2, NULL); IDSubSetting=1; break;
-  case 2: limpiarSelector(); textSinClear(18, 120, ">", 2, NULL); IDSubSetting=2; break;
-  default: limpiarSelector(); textSinClear(18, 240, ">", 2, NULL); IDSubSetting=3;   
+  case 2: limpiarSelector(); textSinClear(18, 240, ">", 2, NULL); IDSubSetting=2;   
   }
 }
 
@@ -912,7 +820,6 @@ void menuProgramarSecuencia(){
   textSinClear(72, 12, "PROGRAMAR SECUENCIA", 3, NULL);    
   tft.setTextColor(BLACK,WHITE);        
   textSinClear(45, 80, "SECTOR #1", 2, NULL);
-  textSinClear(45, 120, "SECTOR #2", 2, NULL);
   textSinClear(45, 240, "SALIR", 2, NULL);    
 
   countJoystickV=1;
@@ -927,7 +834,7 @@ void programaSecuencia(){
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >530 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 3) countJoystickV=0;      
       countJoystickV++;      
@@ -935,7 +842,7 @@ void programaSecuencia(){
     }
     if (JoystickY >=0 && JoystickY <470) {     //¿SE MUEVE HACIA LA ARRIBA?
       delay(200);
-      if (countJoystickV <=1) countJoystickV=4;     
+      if (countJoystickV <=1) countJoystickV=3;     
       countJoystickV--; 
       selectorProgSecuencia();
     }
@@ -943,8 +850,7 @@ void programaSecuencia(){
       while(!digitalRead(pulsador));
       switch(IDSubSetting){
         case 1: programaSecuencia2(&hora_Inicio, &minuto_Inicio, &duracion_Horas, &duracion_Minutos, dias_Riego, marca_Dias_Riego, dia_Semana, 1); menuProgramarSecuencia(); break;
-        case 2: programaSecuencia2(&hora_Inicio2, &minuto_Inicio2, &duracion_Horas2, &duracion_Minutos2, dias_Riego2, marca_Dias_Riego2, dia_Semana2, 2); menuProgramarSecuencia(); break;  
-        case 3: modoProgSecuencia=false; 
+        default: modoProgSecuencia=false; 
       }
     }
   }
@@ -973,7 +879,7 @@ void programaSecuencia2(byte *horaInicio, byte *minutoInicio, byte *duracionHora
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >530 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 5) countJoystickV=0;      
       countJoystickV++;      
@@ -1008,25 +914,13 @@ void selectorProgSecuencia2(){
   }
 }
 
-void WR_EEPROM (int pos_memory_eeprom, byte dato_W, boolean WR, byte *dato_R, byte *dato_R2, byte numPrograma){
-  switch(numPrograma){
-    case 1:
-      EEPROM.write(pos_memory_eeprom, dato_W);
-      delay(4);
-      if(WR){
-        *dato_R=EEPROM.read(pos_memory_eeprom);
-        delay(1);
-      }  
-      break;
-      
-    case 2:
-      EEPROM.write(pos_memory_eeprom + 1, dato_W);
-      delay(4);
-      if(WR){
-        *dato_R2=EEPROM.read(pos_memory_eeprom + 1);
-        delay(1);
-      }
-  }
+void WR_EEPROM (int pos_memory_eeprom, byte dato_W, boolean WR, byte *dato_R){
+  EEPROM.write(pos_memory_eeprom, dato_W);
+  delay(4);
+  if(WR){
+    *dato_R=EEPROM.read(pos_memory_eeprom);
+    delay(1);
+  }  
 }
 
 void agregarhoraInicio(byte horaInicio, byte minutoInicio, byte numPrograma){
@@ -1041,19 +935,19 @@ void agregarhoraInicio(byte horaInicio, byte minutoInicio, byte numPrograma){
     horaInicio = edit(75, 225, 2, horaInicio, &FreeSevenSegNumFont);
     if(horaInicio==24) {
       horaInicio=0;
-      WR_EEPROM(EEPROM_hora_Inicio, horaInicio, true, &hora_Inicio, &hora_Inicio2, numPrograma); 
+      WR_EEPROM(EEPROM_hora_Inicio, horaInicio, true, &hora_Inicio); 
     }
     else {
-      WR_EEPROM(EEPROM_hora_Inicio, horaInicio, true, &hora_Inicio, &hora_Inicio2, numPrograma);   
+      WR_EEPROM(EEPROM_hora_Inicio, horaInicio, true, &hora_Inicio);   
     }   
     i=5;
     minutoInicio = edit(275, 225, 2, minutoInicio, &FreeSevenSegNumFont);                
     if(minutoInicio==60) {
       minutoInicio=0;
-      WR_EEPROM(EEPROM_minuto_Inicio, minutoInicio, true, &minuto_Inicio, &minuto_Inicio2, numPrograma);      
+      WR_EEPROM(EEPROM_minuto_Inicio, minutoInicio, true, &minuto_Inicio);      
     }
     else {
-      WR_EEPROM(EEPROM_minuto_Inicio, minutoInicio, true, &minuto_Inicio, &minuto_Inicio2, numPrograma);
+      WR_EEPROM(EEPROM_minuto_Inicio, minutoInicio, true, &minuto_Inicio);
     }  
     
     while(true){
@@ -1105,19 +999,19 @@ void agregarDuracion(byte duracionHoras, byte duracionMinutos, byte numPrograma)
     duracionHoras=edit(75, 225, 2, duracionHoras, &FreeSevenSegNumFont);
     if(duracionHoras==24) {
       duracionHoras=0;
-      WR_EEPROM(EEPROM_duracion_Horas, duracionHoras, true, &duracion_Horas, &duracion_Horas2, numPrograma);      
+      WR_EEPROM(EEPROM_duracion_Horas, duracionHoras, true, &duracion_Horas);      
     }
     else {
-      WR_EEPROM(EEPROM_duracion_Horas, duracionHoras, true, &duracion_Horas, &duracion_Horas2, numPrograma);
+      WR_EEPROM(EEPROM_duracion_Horas, duracionHoras, true, &duracion_Horas);
     }                  
     i=5;
     duracionMinutos=edit(275, 225, 2, duracionMinutos, &FreeSevenSegNumFont);
     if(duracionMinutos==60) {
       duracionMinutos=0; 
-      WR_EEPROM(EEPROM_duracion_Minutos, duracionMinutos, true, &duracion_Minutos, &duracion_Minutos2, numPrograma);     
+      WR_EEPROM(EEPROM_duracion_Minutos, duracionMinutos, true, &duracion_Minutos);     
     }  
     else {
-      WR_EEPROM(EEPROM_duracion_Minutos, duracionMinutos, true, &duracion_Minutos, &duracion_Minutos2, numPrograma);
+      WR_EEPROM(EEPROM_duracion_Minutos, duracionMinutos, true, &duracion_Minutos);
     }                       
     while(true){
       JoystickX = analogRead(A6);
@@ -1174,7 +1068,7 @@ void agregarDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[],
        if(diaSemanaRiego < 1) diaSemanaRiego = 8 ;
        delay(200);   
      }
-     if (JoystickY >530 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
+     if (JoystickY >600 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
        tft.setTextColor(BLACK, WHITE); 
        mostrarDiasRiego2();
        diaSemanaRiego++;
@@ -1193,44 +1087,44 @@ void agregarDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[],
        switch(diaSemanaRiego){
          case 1:
          diasRiego[0]=!diasRiego[0];
-         WR_EEPROM(EEPROM_dias_Riego_0, diasRiego[0], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);   
+         WR_EEPROM(EEPROM_dias_Riego_0, diasRiego[0], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);   
          break; 
 
          case 2:
          diasRiego[1]=!diasRiego[1];
-         WR_EEPROM(EEPROM_dias_Riego_1, diasRiego[1], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);    
+         WR_EEPROM(EEPROM_dias_Riego_1, diasRiego[1], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);    
          break;    
           
          case 3:
          diasRiego[2]=!diasRiego[2];
-         WR_EEPROM(EEPROM_dias_Riego_2, diasRiego[2], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);   
+         WR_EEPROM(EEPROM_dias_Riego_2, diasRiego[2], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);   
          break;    
 
          case 4:
          diasRiego[3]=!diasRiego[3];
-         WR_EEPROM(EEPROM_dias_Riego_3, diasRiego[3], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);   
+         WR_EEPROM(EEPROM_dias_Riego_3, diasRiego[3], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);   
          break;          
 
          case 5:
          diasRiego[4]=!diasRiego[4];
-         WR_EEPROM(EEPROM_dias_Riego_4, diasRiego[4], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);
+         WR_EEPROM(EEPROM_dias_Riego_4, diasRiego[4], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);
          break;         
 
          case 6:
          diasRiego[5]=!diasRiego[5];
-         WR_EEPROM(EEPROM_dias_Riego_5, diasRiego[5], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);
+         WR_EEPROM(EEPROM_dias_Riego_5, diasRiego[5], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);
          break;         
           
          case 7:
          diasRiego[6]=!diasRiego[6];
-         WR_EEPROM(EEPROM_dias_Riego_6, diasRiego[6], false, NULL, NULL, numPrograma); 
-         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana, numPrograma);
+         WR_EEPROM(EEPROM_dias_Riego_6, diasRiego[6], false, NULL); 
+         selectorDiasRiego(diasRiego, marcaDiasRiego, diaSemana);
          break;         
 
          default:
@@ -1241,13 +1135,13 @@ void agregarDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[],
    }
 }
 
-void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[], byte numPrograma){
+void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]){
   switch(diaSemanaRiego){
     case 1:
     if(diasRiego[0]==HIGH) {
       marcaDiasRiego[0]='X'; diaSemana[0]='L';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_0, marcaDiasRiego[0], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_lunes, diaSemana[0], false, NULL, NULL, numPrograma); 
+      WR_EEPROM(EEPROM_marca_Dias_Riego_0, marcaDiasRiego[0], false, NULL);
+      WR_EEPROM(EEPROM_lunes, diaSemana[0], false, NULL); 
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(64, 80); 
@@ -1259,8 +1153,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(64, 80);
       tft.print(marcaDiasRiego[0]);     
       marcaDiasRiego[0]=' '; diaSemana[0]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_0, marcaDiasRiego[0], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_lunes, diaSemana[0], false, NULL, NULL, numPrograma); 
+      WR_EEPROM(EEPROM_marca_Dias_Riego_0, marcaDiasRiego[0], false, NULL);
+      WR_EEPROM(EEPROM_lunes, diaSemana[0], false, NULL); 
       tft.setTextColor(BLACK, WHITE);       
     }
     break;
@@ -1268,8 +1162,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 2:
     if(diasRiego[1]==HIGH) {
       marcaDiasRiego[1]='X'; diaSemana[1]='M';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_1, marcaDiasRiego[1], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_martes, diaSemana[1], false, NULL, NULL, numPrograma);       
+      WR_EEPROM(EEPROM_marca_Dias_Riego_1, marcaDiasRiego[1], false, NULL);
+      WR_EEPROM(EEPROM_martes, diaSemana[1], false, NULL);       
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(64, 120); 
@@ -1281,8 +1175,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(64, 120);
       tft.print(marcaDiasRiego[1]);     
       marcaDiasRiego[1]=' '; diaSemana[1]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_1, marcaDiasRiego[1], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_martes, diaSemana[1], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_1, marcaDiasRiego[1], false, NULL);
+      WR_EEPROM(EEPROM_martes, diaSemana[1], false, NULL);        
       tft.setTextColor(BLACK, WHITE);              
     }
     break;
@@ -1290,8 +1184,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 3:
     if(diasRiego[2]==HIGH) {
       marcaDiasRiego[2]='X'; diaSemana[2]='M';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_2, marcaDiasRiego[2], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_miercoles, diaSemana[2], false, NULL, NULL, numPrograma);       
+      WR_EEPROM(EEPROM_marca_Dias_Riego_2, marcaDiasRiego[2], false, NULL);
+      WR_EEPROM(EEPROM_miercoles, diaSemana[2], false, NULL);       
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(64, 160); 
@@ -1303,8 +1197,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(64, 160);
       tft.print(marcaDiasRiego[2]);     
       marcaDiasRiego[2]=' '; diaSemana[2]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_2, marcaDiasRiego[2], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_miercoles, diaSemana[2], false, NULL, NULL, numPrograma);         
+      WR_EEPROM(EEPROM_marca_Dias_Riego_2, marcaDiasRiego[2], false, NULL);
+      WR_EEPROM(EEPROM_miercoles, diaSemana[2], false, NULL);         
       tft.setTextColor(BLACK, WHITE);         
     }
     break;
@@ -1312,8 +1206,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 4:
     if(diasRiego[3]==HIGH) {
       marcaDiasRiego[3]='X'; diaSemana[3]='J';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_3, marcaDiasRiego[3], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_jueves, diaSemana[3], false, NULL, NULL, numPrograma);         
+      WR_EEPROM(EEPROM_marca_Dias_Riego_3, marcaDiasRiego[3], false, NULL);
+      WR_EEPROM(EEPROM_jueves, diaSemana[3], false, NULL);         
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(64, 200); 
@@ -1325,8 +1219,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(64, 200);
       tft.print(marcaDiasRiego[3]);     
       marcaDiasRiego[3]=' '; diaSemana[3]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_3, marcaDiasRiego[3], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_jueves, diaSemana[3], false, NULL, NULL, numPrograma);          
+      WR_EEPROM(EEPROM_marca_Dias_Riego_3, marcaDiasRiego[3], false, NULL);
+      WR_EEPROM(EEPROM_jueves, diaSemana[3], false, NULL);          
       tft.setTextColor(BLACK, WHITE);            
     }
     break;
@@ -1334,8 +1228,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 5:
     if(diasRiego[4]==HIGH) {
       marcaDiasRiego[4]='X'; diaSemana[4]='V';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_4, marcaDiasRiego[4], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_viernes, diaSemana[4], false, NULL, NULL, numPrograma);         
+      WR_EEPROM(EEPROM_marca_Dias_Riego_4, marcaDiasRiego[4], false, NULL);
+      WR_EEPROM(EEPROM_viernes, diaSemana[4], false, NULL);         
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(64, 240); 
@@ -1347,8 +1241,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(64, 240);
       tft.print(marcaDiasRiego[4]);     
       marcaDiasRiego[4]=' '; diaSemana[4]='_'; 
-      WR_EEPROM(EEPROM_marca_Dias_Riego_4, marcaDiasRiego[4], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_viernes, diaSemana[4], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_4, marcaDiasRiego[4], false, NULL);
+      WR_EEPROM(EEPROM_viernes, diaSemana[4], false, NULL);        
       tft.setTextColor(BLACK, WHITE);             
     }
     break;
@@ -1356,8 +1250,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 6:
     if(diasRiego[5]==HIGH) {
       marcaDiasRiego[5]='X'; diaSemana[5]='S';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_5, marcaDiasRiego[5], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_sabado, diaSemana[5], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_5, marcaDiasRiego[5], false, NULL);
+      WR_EEPROM(EEPROM_sabado, diaSemana[5], false, NULL);        
       tft.setTextColor(BLACK, WHITE);
       tft.setTextSize(2); 
       tft.setCursor(306, 80); 
@@ -1369,8 +1263,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(306, 80);
       tft.print(marcaDiasRiego[5]);     
       marcaDiasRiego[5]=' '; diaSemana[5]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_5, marcaDiasRiego[5], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_sabado, diaSemana[5], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_5, marcaDiasRiego[5], false, NULL);
+      WR_EEPROM(EEPROM_sabado, diaSemana[5], false, NULL);        
       tft.setTextColor(BLACK, WHITE);            
     }
     break;
@@ -1378,8 +1272,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
     case 7:
     if(diasRiego[6]==HIGH) {
       marcaDiasRiego[6]='X'; diaSemana[6]='D';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_6, marcaDiasRiego[6], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_domingo, diaSemana[6], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_6, marcaDiasRiego[6], false, NULL);
+      WR_EEPROM(EEPROM_domingo, diaSemana[6], false, NULL);        
       tft.setTextColor(BLACK, WHITE); 
       tft.setTextSize(2); 
       tft.setCursor(306, 120); 
@@ -1391,8 +1285,8 @@ void selectorDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[]
       tft.setCursor(306, 120);
       tft.print(marcaDiasRiego[6]);   
       marcaDiasRiego[6]=' '; diaSemana[6]='_';
-      WR_EEPROM(EEPROM_marca_Dias_Riego_6, marcaDiasRiego[6], false, NULL, NULL, numPrograma);
-      WR_EEPROM(EEPROM_domingo, diaSemana[6], false, NULL, NULL, numPrograma);        
+      WR_EEPROM(EEPROM_marca_Dias_Riego_6, marcaDiasRiego[6], false, NULL);
+      WR_EEPROM(EEPROM_domingo, diaSemana[6], false, NULL);        
       tft.setTextColor(BLACK, WHITE);            
     }
     break;
@@ -1482,44 +1376,7 @@ void borrarSecuencia(byte numPrograma){
     flagModo=false; EEPROM.write(EEPROM_flagModo1, flagModo);
     digitalWrite(valvula_1, HIGH);
     flagAlarma=false; 
-    break;    
-
-  case 2:
-    hora_Inicio2=0; EEPROM.write(EEPROM_hora_Inicio2, hora_Inicio2);
-    minuto_Inicio2=0; EEPROM.write(EEPROM_minuto_Inicio2, minuto_Inicio2);
-    duracion_Horas2=0; EEPROM.write(EEPROM_duracion_Horas2, duracion_Horas2);
-    duracion_Minutos2=0; EEPROM.write(EEPROM_duracion_Minutos2, duracion_Minutos2);
-
-    dias_Riego2[0]=LOW; EEPROM.write(EEPROM_dias_Riego2_0, dias_Riego2[0]);
-    dias_Riego2[1]=LOW; EEPROM.write(EEPROM_dias_Riego2_1, dias_Riego2[1]);
-    dias_Riego2[2]=LOW; EEPROM.write(EEPROM_dias_Riego2_2, dias_Riego2[2]);
-    dias_Riego2[3]=LOW; EEPROM.write(EEPROM_dias_Riego2_3, dias_Riego2[3]);
-    dias_Riego2[4]=LOW; EEPROM.write(EEPROM_dias_Riego2_4, dias_Riego2[4]);
-    dias_Riego2[5]=LOW; EEPROM.write(EEPROM_dias_Riego2_5, dias_Riego2[5]);
-    dias_Riego2[6]=LOW; EEPROM.write(EEPROM_dias_Riego2_6, dias_Riego2[6]);     
-
-    marca_Dias_Riego2[0]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_0, marca_Dias_Riego2[0]);
-    marca_Dias_Riego2[1]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_1, marca_Dias_Riego2[1]);
-    marca_Dias_Riego2[2]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_2, marca_Dias_Riego2[2]);
-    marca_Dias_Riego2[3]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_3, marca_Dias_Riego2[3]);
-    marca_Dias_Riego2[4]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_4, marca_Dias_Riego2[4]);
-    marca_Dias_Riego2[5]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_5, marca_Dias_Riego2[5]);
-    marca_Dias_Riego2[6]=' '; EEPROM.write(EEPROM_marca_Dias_Riego2_6, marca_Dias_Riego2[6]);
-
-    dia_Semana2[0]='_'; EEPROM.write(EEPROM_lunes2, dia_Semana2[0]);
-    dia_Semana2[1]='_'; EEPROM.write(EEPROM_martes2, dia_Semana2[1]);
-    dia_Semana2[2]='_'; EEPROM.write(EEPROM_miercoles2, dia_Semana2[2]);
-    dia_Semana2[3]='_'; EEPROM.write(EEPROM_jueves2, dia_Semana2[3]);
-    dia_Semana2[4]='_'; EEPROM.write(EEPROM_viernes2, dia_Semana2[4]); 
-    dia_Semana2[5]='_'; EEPROM.write(EEPROM_sabado2, dia_Semana2[5]); 
-    dia_Semana2[6]='_'; EEPROM.write(EEPROM_domingo2, dia_Semana2[6]);    
-
-    sector[1]=LOW, EEPROM.write(EEPROM_sector2, sector[1]);
-    sector_Marca[1]=' '; EEPROM.write(EEPROM_sector_Marca2, sector_Marca[1]);
-    flagModo2=false; EEPROM.write(EEPROM_flagModo2, flagModo2);
-    digitalWrite(valvula_2, HIGH);
-    flagAlarma2=false;     
-    break;   
+    break;       
   }
        
   flagDashboard=true;
@@ -1533,25 +1390,18 @@ void borrarSecuencia(byte numPrograma){
 
 void readEEPROM(){
   flagModo=EEPROM.read(EEPROM_flagModo1);
-  flagModo2=EEPROM.read(EEPROM_flagModo2);
 
   sector[0]=EEPROM.read(EEPROM_sector1);
-  sector[1]=EEPROM.read(EEPROM_sector2);
 
   sector_Marca[0]=EEPROM.read(EEPROM_sector_Marca1);
-  sector_Marca[1]=EEPROM.read(EEPROM_sector_Marca2);  
   
   hora_Inicio=EEPROM.read(EEPROM_hora_Inicio);
-  hora_Inicio2=EEPROM.read(EEPROM_hora_Inicio2);
   
   minuto_Inicio=EEPROM.read(EEPROM_minuto_Inicio);
-  minuto_Inicio2=EEPROM.read(EEPROM_minuto_Inicio2);
   
   duracion_Horas=EEPROM.read(EEPROM_duracion_Horas); 
-  duracion_Horas2=EEPROM.read(EEPROM_duracion_Horas2); 
   
   duracion_Minutos=EEPROM.read(EEPROM_duracion_Minutos); 
-  duracion_Minutos2=EEPROM.read(EEPROM_duracion_Minutos2); 
    
   dias_Riego[0]=EEPROM.read(EEPROM_dias_Riego_0); 
   dias_Riego[1]=EEPROM.read(EEPROM_dias_Riego_1); 
@@ -1561,34 +1411,19 @@ void readEEPROM(){
   dias_Riego[5]=EEPROM.read(EEPROM_dias_Riego_5); 
   dias_Riego[6]=EEPROM.read(EEPROM_dias_Riego_6);    
 
-  dias_Riego2[0]=EEPROM.read(EEPROM_dias_Riego2_0); 
-  dias_Riego2[1]=EEPROM.read(EEPROM_dias_Riego2_1); 
-  dias_Riego2[2]=EEPROM.read(EEPROM_dias_Riego2_2); 
-  dias_Riego2[3]=EEPROM.read(EEPROM_dias_Riego2_3); 
-  dias_Riego2[4]=EEPROM.read(EEPROM_dias_Riego2_4);                                 
-  dias_Riego2[5]=EEPROM.read(EEPROM_dias_Riego2_5); 
-  dias_Riego2[6]=EEPROM.read(EEPROM_dias_Riego2_6);                                                                                                                         
-  
   dia_Semana[0]=EEPROM.read(EEPROM_lunes);
-  dia_Semana2[0]=EEPROM.read(EEPROM_lunes2);  
 
   dia_Semana[1]=EEPROM.read(EEPROM_martes);   
-  dia_Semana2[1]=EEPROM.read(EEPROM_martes2); 
-        
+
   dia_Semana[2]=EEPROM.read(EEPROM_miercoles); 
-  dia_Semana2[2]=EEPROM.read(EEPROM_miercoles2); 
         
-  dia_Semana[3]=EEPROM.read(EEPROM_jueves); 
-  dia_Semana2[3]=EEPROM.read(EEPROM_jueves2); 
+  dia_Semana[3]=EEPROM.read(EEPROM_jueves);  
         
   dia_Semana[4]=EEPROM.read(EEPROM_viernes);
-  dia_Semana2[4]=EEPROM.read(EEPROM_viernes2);
         
   dia_Semana[5]=EEPROM.read(EEPROM_sabado); 
-  dia_Semana2[5]=EEPROM.read(EEPROM_sabado2); 
         
-  dia_Semana[6]=EEPROM.read(EEPROM_domingo);
-  dia_Semana2[6]=EEPROM.read(EEPROM_domingo2);     
+  dia_Semana[6]=EEPROM.read(EEPROM_domingo);    
   
   marca_Dias_Riego[0]=EEPROM.read(EEPROM_marca_Dias_Riego_0); 
   marca_Dias_Riego[1]=EEPROM.read(EEPROM_marca_Dias_Riego_1); 
@@ -1597,37 +1432,23 @@ void readEEPROM(){
   marca_Dias_Riego[4]=EEPROM.read(EEPROM_marca_Dias_Riego_4);
   marca_Dias_Riego[5]=EEPROM.read(EEPROM_marca_Dias_Riego_5); 
   marca_Dias_Riego[6]=EEPROM.read(EEPROM_marca_Dias_Riego_6);  
-
-  marca_Dias_Riego2[0]=EEPROM.read(EEPROM_marca_Dias_Riego2_0); 
-  marca_Dias_Riego2[1]=EEPROM.read(EEPROM_marca_Dias_Riego2_1); 
-  marca_Dias_Riego2[2]=EEPROM.read(EEPROM_marca_Dias_Riego2_2); 
-  marca_Dias_Riego2[3]=EEPROM.read(EEPROM_marca_Dias_Riego2_3); 
-  marca_Dias_Riego2[4]=EEPROM.read(EEPROM_marca_Dias_Riego2_4);
-  marca_Dias_Riego2[5]=EEPROM.read(EEPROM_marca_Dias_Riego2_5); 
-  marca_Dias_Riego2[6]=EEPROM.read(EEPROM_marca_Dias_Riego2_6);     
+  
 }
 
 void writeEEPROM(){
   EEPROM.write(EEPROM_flagModo1, false);
-  EEPROM.write(EEPROM_flagModo2, false);
 
   EEPROM.write(EEPROM_sector1, ' ');
-  EEPROM.write(EEPROM_sector2, ' ');
 
   EEPROM.write(EEPROM_sector_Marca1, ' ');
-  EEPROM.write(EEPROM_sector_Marca2, ' ');  
   
   EEPROM.write(EEPROM_hora_Inicio, 0);
-  EEPROM.write(EEPROM_hora_Inicio2, 0);
   
   EEPROM.write(EEPROM_minuto_Inicio, 0);
-  EEPROM.write(EEPROM_minuto_Inicio2, 0);
   
   EEPROM.write(EEPROM_duracion_Horas, 0); 
-  EEPROM.write(EEPROM_duracion_Horas2, 0); 
   
   EEPROM.write(EEPROM_duracion_Minutos, 0); 
-  EEPROM.write(EEPROM_duracion_Minutos2, 0); 
    
   EEPROM.write(EEPROM_dias_Riego_0, LOW); 
   EEPROM.write(EEPROM_dias_Riego_1, LOW); 
@@ -1635,36 +1456,21 @@ void writeEEPROM(){
   EEPROM.write(EEPROM_dias_Riego_3, LOW); 
   EEPROM.write(EEPROM_dias_Riego_4, LOW);                                 
   EEPROM.write(EEPROM_dias_Riego_5, LOW); 
-  EEPROM.write(EEPROM_dias_Riego_6, LOW);    
-
-  EEPROM.write(EEPROM_dias_Riego2_0, LOW); 
-  EEPROM.write(EEPROM_dias_Riego2_1, LOW); 
-  EEPROM.write(EEPROM_dias_Riego2_2, LOW); 
-  EEPROM.write(EEPROM_dias_Riego2_3, LOW); 
-  EEPROM.write(EEPROM_dias_Riego2_4, LOW);                                 
-  EEPROM.write(EEPROM_dias_Riego2_5, LOW); 
-  EEPROM.write(EEPROM_dias_Riego2_6, LOW);                                                                                                                         
+  EEPROM.write(EEPROM_dias_Riego_6, LOW);                                                                                                                           
   
   EEPROM.write(EEPROM_lunes, '_');
-  EEPROM.write(EEPROM_lunes2, '_');  
 
   EEPROM.write(EEPROM_martes, '_');   
-  EEPROM.write(EEPROM_martes2, '_'); 
         
   EEPROM.write(EEPROM_miercoles, '_'); 
-  EEPROM.write(EEPROM_miercoles2, '_'); 
         
   EEPROM.write(EEPROM_jueves, '_'); 
-  EEPROM.write(EEPROM_jueves2, '_'); 
         
   EEPROM.write(EEPROM_viernes, '_');
-  EEPROM.write(EEPROM_viernes2, '_');
         
-  EEPROM.write(EEPROM_sabado, '_'); 
-  EEPROM.write(EEPROM_sabado2, '_'); 
+  EEPROM.write(EEPROM_sabado, '_');  
         
-  EEPROM.write(EEPROM_domingo, '_');
-  EEPROM.write(EEPROM_domingo2, '_');     
+  EEPROM.write(EEPROM_domingo, '_');    
   
   EEPROM.write(EEPROM_marca_Dias_Riego_0, ' '); 
   EEPROM.write(EEPROM_marca_Dias_Riego_1, ' '); 
@@ -1672,13 +1478,5 @@ void writeEEPROM(){
   EEPROM.write(EEPROM_marca_Dias_Riego_3, ' '); 
   EEPROM.write(EEPROM_marca_Dias_Riego_4, ' ');
   EEPROM.write(EEPROM_marca_Dias_Riego_5, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego_6, ' ');  
-
-  EEPROM.write(EEPROM_marca_Dias_Riego2_0, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego2_1, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego2_2, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego2_3, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego2_4, ' ');
-  EEPROM.write(EEPROM_marca_Dias_Riego2_5, ' '); 
-  EEPROM.write(EEPROM_marca_Dias_Riego2_6, ' ');    
+  EEPROM.write(EEPROM_marca_Dias_Riego_6, ' ');    
 }
