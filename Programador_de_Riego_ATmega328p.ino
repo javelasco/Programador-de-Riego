@@ -105,6 +105,15 @@ char marca_Dias_Riego[] = {' ', ' ', ' ', ' ', ' ', ' ', ' '};
 //Variables usadas para mostrar en el Dashboard
 char dia_Semana[]={'_', '_', '_', '_', '_', '_', '_'};
 
+
+//Limites de X
+#define X_LowerLimit 380
+#define X_UpperLimit 620
+
+//Limites de Y
+#define Y_LowerLimit 380
+#define Y_UpperLimit 620
+
 void setup() {
   pinMode(pulsador, INPUT_PULLUP);
   pinMode(valvula_1, OUTPUT);     
@@ -205,7 +214,7 @@ void loop() {
     //JoystickY = analogRead(A7);
   
     //MOVIMIENTOS HORIZONTALES
-    if (JoystickX >=0 && JoystickX <400) {        //¿SE MUEVE HACIA LA IZQUIERDA?
+    if (JoystickX >=0 && JoystickX <X_LowerLimit) {        //¿SE MUEVE HACIA LA IZQUIERDA?
       delay(250);
       flagDashboard=false;
       flagSettings=true;
@@ -213,7 +222,7 @@ void loop() {
       tft.fillScreen(WHITE);
       }
    
-    if (JoystickX >600 && JoystickX <=1023) {     //¿SE MUEVE HACIA LA DERECHA?
+    if (JoystickX >X_UpperLimit && JoystickX <=1023) {     //¿SE MUEVE HACIA LA DERECHA?
       delay(250);
       flagDashboard=false;
       flagSettings=true;
@@ -236,14 +245,14 @@ void loop() {
     JoystickY = analogRead(A7);
   
     //MOVIMIENTOS VERTICALES
-    if (JoystickY > 600 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO? 
+    if (JoystickY >Y_UpperLimit && JoystickY <=1023) {        //¿SE MUEVE HACIA ARRIBA? 
       delay(200);
       if(countJoystickV >= 4) countJoystickV=0;
       countJoystickV++;
       selectorSettings();
     }
    
-    if (JoystickY >= 0 && JoystickY < 470) {     //¿SE MUEVE HACIA LA ARRIBA?
+    if (JoystickY >=0 && JoystickY <Y_LowerLimit) {     //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if (countJoystickV <= 1) countJoystickV=5;
       countJoystickV--;
@@ -251,7 +260,7 @@ void loop() {
     }
     
     //MOVIMIENTOS HORIZONTALES
-    if (JoystickX >=0 && JoystickX <400) {        //¿SE MUEVE HACIA LA IZQUIERDA?
+    if (JoystickX >=0 && JoystickX <X_LowerLimit) {        //¿SE MUEVE HACIA LA IZQUIERDA?
       delay(250);
       flagDashboard=true;
       flagSettings=false;
@@ -259,7 +268,7 @@ void loop() {
       tft.fillScreen(WHITE);
       }
    
-    if (JoystickX >600 && JoystickX <=1023) {     //¿SE MUEVE HACIA LA DERECHA?
+    if (JoystickX >X_UpperLimit && JoystickX <=1023) {     //¿SE MUEVE HACIA LA DERECHA?
       delay(250);
       flagDashboard=true;
       flagSettings=false;
@@ -420,7 +429,7 @@ void printDigits(unsigned int digits){
 
 void oscilarText(){
   byte y=0;
-  while (y<10 && JoystickY >=470 && JoystickY <540 && digitalRead(pulsador)){
+  while (y<10 && JoystickY >=Y_LowerLimit && JoystickY <Y_UpperLimit && digitalRead(pulsador)){
     y++;
     JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
@@ -498,7 +507,7 @@ void fechaHora(){
       tft.setTextColor(BLACK,WHITE); 
       textSinClear(312, 272, "GUARDAR", 3, NULL);
       oscilarText();
-      if(JoystickX >= 0 && JoystickX < 400){
+      if(JoystickX >= 0 && JoystickX < X_LowerLimit){
         delay(300);
         break;
       }
@@ -536,7 +545,7 @@ byte edit(unsigned int x_pos, unsigned int y_pos, byte sizeText, int parametro, 
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
 
-    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >Y_UpperLimit && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       switch(i){
         case 1: 
           if(parametro < 1) parametro = 31; 
@@ -584,7 +593,7 @@ byte edit(unsigned int x_pos, unsigned int y_pos, byte sizeText, int parametro, 
           delay(100);  
       }
     }
-    if (JoystickY >= 0 && JoystickY < 470) {      //¿SE MUEVE HACIA ARRIBA?
+    if (JoystickY >=0 && JoystickY <Y_LowerLimit) {      //¿SE MUEVE HACIA ARRIBA?
       switch(i){
         case 1:
           tft.setCursor(x_pos,y_pos);
@@ -657,13 +666,13 @@ void riegoManual(){
   while(!flagDashboard){
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >600 && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >Y_UpperLimit && JoystickY <= 1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 2) countJoystickV=0;
       countJoystickV++;
       selectorRiegoManual();      
     }
-    if (JoystickY >=0 && JoystickY < 470) {     //¿SE MUEVE HACIA LA ARRIBA?
+    if (JoystickY >=0 && JoystickY < Y_LowerLimit) {     //¿SE MUEVE HACIA LA ARRIBA?
       delay(200);
       if (countJoystickV <=1) countJoystickV=3;
       countJoystickV--;
@@ -715,7 +724,7 @@ void desactivar (){
      tft.setTextColor(WHITE, WHITE); 
      mostrarSectores();
      oscilarText();
-     if (JoystickY >= 0 && JoystickY < 470) {         //¿SE MUEVE HACIA ARRIBA?
+     if (JoystickY >=0 && JoystickY <Y_LowerLimit) {         //¿SE MUEVE HACIA ARRIBA?
        if(contadorSector < 1) contadorSector = 3;   
        tft.setTextColor(BLACK, WHITE); 
        mostrarSectores();
@@ -723,7 +732,7 @@ void desactivar (){
        if(contadorSector < 1) contadorSector = 2 ;
        delay(200);   
      }
-     if (JoystickY >600 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
+     if (JoystickY >Y_UpperLimit && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
        tft.setTextColor(BLACK, WHITE); 
        mostrarSectores();
        contadorSector++;
@@ -834,13 +843,13 @@ void programaSecuencia(){
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >Y_UpperLimit && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 3) countJoystickV=0;      
       countJoystickV++;      
       selectorProgSecuencia();
     }
-    if (JoystickY >=0 && JoystickY <470) {     //¿SE MUEVE HACIA LA ARRIBA?
+    if (JoystickY >=0 && JoystickY <Y_LowerLimit) {     //¿SE MUEVE HACIA LA ARRIBA?
       delay(200);
       if (countJoystickV <=1) countJoystickV=3;     
       countJoystickV--; 
@@ -879,13 +888,13 @@ void programaSecuencia2(byte *horaInicio, byte *minutoInicio, byte *duracionHora
     //JoystickX = analogRead(A6);
     JoystickY = analogRead(A7);
        //MOVIMIENTOS VERTICALES
-    if (JoystickY >600 && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
+    if (JoystickY >Y_UpperLimit && JoystickY <=1023) {        //¿SE MUEVE HACIA ABAJO?
       delay(200);
       if(countJoystickV >= 5) countJoystickV=0;      
       countJoystickV++;      
       selectorProgSecuencia2();
     }
-    if (JoystickY >=0 && JoystickY <470) {     //¿SE MUEVE HACIA LA ARRIBA?
+    if (JoystickY >=0 && JoystickY <Y_LowerLimit) {     //¿SE MUEVE HACIA LA ARRIBA?
       delay(200);
       if (countJoystickV <=1) countJoystickV=6;     
       countJoystickV--; 
@@ -959,7 +968,7 @@ void agregarhoraInicio(byte horaInicio, byte minutoInicio, byte numPrograma){
       tft.setTextColor(BLACK, WHITE); 
       textSinClear(312, 272, "GUARDAR", 3, NULL); 
       oscilarText();
-      if(JoystickX >= 0 && JoystickX < 400){        // SE MUEVE HACIA LA IZQUIERDA
+      if(JoystickX >= 0 && JoystickX < X_LowerLimit){        // SE MUEVE HACIA LA IZQUIERDA
         break;
       }
       if(!digitalRead(pulsador)){
@@ -1022,7 +1031,7 @@ void agregarDuracion(byte duracionHoras, byte duracionMinutos, byte numPrograma)
       tft.setTextColor(BLACK, WHITE); 
       textSinClear(312, 272, "GUARDAR", 3, NULL);
       oscilarText();
-      if(JoystickX >= 0 && JoystickX < 400){
+      if(JoystickX >= 0 && JoystickX < X_LowerLimit){
         break;
       }
       if(!digitalRead(pulsador)){
@@ -1060,7 +1069,7 @@ void agregarDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[],
      tft.setTextColor(WHITE, WHITE); 
      mostrarDiasRiego2();
      oscilarText();
-     if (JoystickY >= 0 && JoystickY < 470) {         //¿SE MUEVE HACIA ARRIBA?
+     if (JoystickY >=0 && JoystickY <Y_LowerLimit) {         //¿SE MUEVE HACIA ARRIBA?
        if(diaSemanaRiego < 1) diaSemanaRiego = 9;   
        tft.setTextColor(BLACK, WHITE); 
        mostrarDiasRiego2();
@@ -1068,7 +1077,7 @@ void agregarDiasRiego(byte diasRiego[], char marcaDiasRiego[], char diaSemana[],
        if(diaSemanaRiego < 1) diaSemanaRiego = 8 ;
        delay(200);   
      }
-     if (JoystickY >600 && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
+     if (JoystickY >Y_UpperLimit && JoystickY <= 1023) {      //¿SE MUEVE HACIA ABAJO?
        tft.setTextColor(BLACK, WHITE); 
        mostrarDiasRiego2();
        diaSemanaRiego++;
